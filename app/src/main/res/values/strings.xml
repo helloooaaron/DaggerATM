@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Dagger ATM</string>
+    <string name="text_amount_zero">0.00</string>
+    <string name="button_action">action</string>
+</resources>
