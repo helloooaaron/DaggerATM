@@ -1,7 +1,5 @@
 package com.example.daggeratm;
 
-import android.widget.TextView;
-
 import java.util.List;
 
 public interface Command {
@@ -12,8 +10,6 @@ public interface Command {
 
     /**
      * Process the rest of the command's words and do something
-     * @param input
-     * @return
      */
     Status handleInput(List<String> input);
 

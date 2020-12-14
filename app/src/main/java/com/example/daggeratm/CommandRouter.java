@@ -1,14 +1,13 @@
 package com.example.daggeratm;
 
 import android.util.Log;
-import android.widget.TextView;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Component;
 
@@ -31,7 +30,7 @@ public final class CommandRouter {
         this.commands = commands;
     }
 
-    Command.Status route(String input, TextView view) {
+    Command.Status route(String input) {
         List<String> splitInput = split(input);
         if (splitInput.isEmpty()) return invalidCommand(input);
 
@@ -63,8 +62,10 @@ public final class CommandRouter {
 @Component(modules = {
         HelloWorldModule.class /* Tell Dagger to look for @Binds method in HelloWorldModule */,
         LoginCommandModule.class, /* Tell Dagger to use LoginModule as instructions */
+        DepositCommandModule.class, /* Tell Dagger to use DepositCommandModule as instructions */
         LoggingOutModule.class /* Tell Dagger to use LoggingOutModule as instructions */
 })
+@Singleton
 interface CommandRouterFactory {
     /**
      * Entry point method.

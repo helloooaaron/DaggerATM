@@ -9,11 +9,14 @@ import dagger.multibindings.StringKey;
 
 public final class LoginCommand extends SingleArgCommand {
     private static final String LOG_TAG = LoginCommand.class.getSimpleName();
+    private final Database database;
     private final Outputter outputter;
 
     @Inject
-    public LoginCommand(Outputter outputter) {
+    public LoginCommand(Database database, Outputter outputter) {
+        this.database = database;
         this.outputter = outputter;
+        outputter.output(LOG_TAG, "Creating a new " + this);
     }
 
     @Override
@@ -23,7 +26,8 @@ public final class LoginCommand extends SingleArgCommand {
 
     @Override
     protected Status handleArg(String username) {
-        outputter.output(LOG_TAG, username + " is logged in.");
+        Database.Account account = database.getAccount(username);
+        outputter.output(LOG_TAG, username + " is logged in with balance: " + account.balance());
         return Status.HANDLED;
     }
 }

@@ -1,8 +1,5 @@
 package com.example.daggeratm;
 
-import android.util.Log;
-import android.widget.TextView;
-
 import java.util.List;
 
 import javax.inject.Inject;
