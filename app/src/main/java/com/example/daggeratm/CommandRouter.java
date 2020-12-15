@@ -2,7 +2,9 @@ package com.example.daggeratm;
 
 import android.util.Log;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import com.example.daggeratm.Command.Status;
+import com.example.daggeratm.Command.Result;
 
 public final class CommandRouter {
     private static final String LOG_TAG = CommandRouter.class.getSimpleName();
@@ -22,7 +26,7 @@ public final class CommandRouter {
 //        commands.put(command.key(), command);
 //    }
 
-    @Inject
+    @Inject // Inject dependency on XXXCommandModule(s) declared in @Component whichever can provide Command instance
     public CommandRouter(Map<String, Command> commands /* Multibinding into Map */) {
         // This map contains:
         // "hello" -> HelloWorldCommand
@@ -30,7 +34,7 @@ public final class CommandRouter {
         this.commands = commands;
     }
 
-    Command.Status route(String input) {
+    Result route(String input) {
         List<String> splitInput = split(input);
         if (splitInput.isEmpty()) return invalidCommand(input);
 
@@ -38,20 +42,47 @@ public final class CommandRouter {
         Command command = commands.get(commandKey);
         if (command == null) return invalidCommand(input);
 
-        Command.Status status = command.handleInput(splitInput.subList(1, splitInput.size()));
-        if (status == Command.Status.INVALID) {
+        Result result = command.handleInput(splitInput.subList(1, splitInput.size()));
+        if (result.status() == Status.INVALID) {
             Log.e(LOG_TAG, commandKey + ": invalid arguments");
         }
-        return status;
+        return result;
     }
 
-    private Command.Status invalidCommand(String input) {
+    private Result invalidCommand(String input) {
         Log.e(LOG_TAG, String.format("Couldn't understand '%s'. Please try again.", input));
-        return Command.Status.INVALID;
+        return Result.invalidResult();
     }
 
     private static List<String> split(String string) {
         return Arrays.asList(string.split(" "));
+    }
+}
+
+final class CommandProcessor {
+    private final Deque<CommandRouter> commandRouterStack = new ArrayDeque<>();
+
+    /**
+     * First CommandRouter is user-unaware CommandRouter with LoginCommand and HelloWorldCommand
+     */
+    @Inject // Inject Dependency on CommandRouter
+    CommandProcessor(CommandRouter firstCommandRouter) {
+        commandRouterStack.push(firstCommandRouter);
+    }
+
+    Status process(String input) {
+        Result result = commandRouterStack.peek().route(input);  // Execute input
+        if (result.status().equals(Status.INPUT_COMPLETED)) {
+            // Pop top CommandRouter when it's completed
+            commandRouterStack.pop();
+            return commandRouterStack.isEmpty() ? Status.INPUT_COMPLETED : Status.HANDLED;
+        }
+
+        result.nestedCommandRouter().ifPresent(
+                // x is nestedCommandRouter when it presents
+                x -> commandRouterStack.push(x)
+                );
+        return result.status();
     }
 }
 
@@ -62,13 +93,13 @@ public final class CommandRouter {
 @Component(modules = {
         HelloWorldModule.class /* Tell Dagger to look for @Binds method in HelloWorldModule */,
         LoginCommandModule.class, /* Tell Dagger to use LoginModule as instructions */
-        DepositCommandModule.class, /* Tell Dagger to use DepositCommandModule as instructions */
-        LoggingOutModule.class /* Tell Dagger to use LoggingOutModule as instructions */
+        LoggingOutModule.class, /* Tell Dagger to use LoggingOutModule as instructions */
+        UserCommandsRouter.InstallationModule.class, /* Tell Dagger to user UserCommandsRouter.InstallationModule as instructions */
 })
 @Singleton
-interface CommandRouterFactory {
+interface CommandProcessorFactory {
     /**
-     * Entry point method.
+     * Request a CommandProcessor instance
      */
-    CommandRouter router();
+    CommandProcessor processor();
 }

@@ -14,31 +14,26 @@ import dagger.Module;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 
+import com.example.daggeratm.Database.Account;
+
 public final class DepositCommand implements Command {
     private static final String LOG_TAG = DepositCommand.class.getSimpleName();
+    private final Account account;
     private final Outputter outputter;
-    private final Database database;
 
     @Inject
-    public DepositCommand(Database database, Outputter outputter) {
-        this.database = database;
+    public DepositCommand(Account account, Outputter outputter) {
+        this.account = account;
         this.outputter = outputter;
         outputter.output(LOG_TAG, "Creating a new " + this);
     }
 
-    @Override
-    public String key() {
-        return "deposit";
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public Status handleInput(List<String> input) {
-        if (input.size() != 2) return Status.INVALID;
-        Database.Account account = database.getAccount(input.get(0));
+    public Result handleInput(List<String> input) {
         account.deposit(new BigDecimal(input.get(1)));
         outputter.output(LOG_TAG, account.username() + " now has: " + account.balance());
-        return Status.HANDLED;
+        return Result.handled();
     }
 }
 
