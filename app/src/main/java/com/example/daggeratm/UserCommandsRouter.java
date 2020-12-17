@@ -5,11 +5,16 @@ import dagger.Module;
 import dagger.Subcomponent;
 import com.example.daggeratm.Database.Account;
 
-@Subcomponent(modules = DepositCommandModule.class)
+@Subcomponent(modules = {
+        DepositCommandModule.class,
+        WithdrawCommandModule.class,
+        LogoutCommandModule.class,
+        AmountsModule.class,
+})
 public interface UserCommandsRouter {
     CommandRouter router();
 
-    @Subcomponent.Factory
+    @Subcomponent.Factory // Create instances of the subcompnent.
     interface Factory {
         /**
          * Create a UserCommandsRouter instance associated with an account, @BindsInstance tells

@@ -28,10 +28,9 @@ public final class DepositCommand implements Command {
         outputter.output(LOG_TAG, "Creating a new " + this);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Result handleInput(List<String> input) {
-        account.deposit(new BigDecimal(input.get(1)));
+        account.deposit(new BigDecimal(input.get(0)));
         outputter.output(LOG_TAG, account.username() + " now has: " + account.balance());
         return Result.handled();
     }

@@ -25,5 +25,6 @@ public class MainActivity extends AppCompatActivity {
     public void action(View view) {
         String cmd = editAction.getText().toString();
         mCommandProcessor.process(cmd);
+        editAction.setText("");
     }
 }
