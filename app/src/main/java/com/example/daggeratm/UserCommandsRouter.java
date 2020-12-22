@@ -5,7 +5,8 @@ import dagger.Module;
 import dagger.Subcomponent;
 import com.example.daggeratm.Database.Account;
 
-@Subcomponent(modules = {
+@PerSession
+@Subcomponent(modules = {  // Subcomponent inherited the modules from parent component
         DepositCommandModule.class,
         WithdrawCommandModule.class,
         LogoutCommandModule.class,
@@ -18,8 +19,10 @@ public interface UserCommandsRouter {
     interface Factory {
         /**
          * Create a UserCommandsRouter instance associated with an account, @BindsInstance tells
-         * Dagger that the Account instance should be requestable by any binding methods in this
+         * Dagger that the Account instance is requestable by any binding methods in this
          * component.
+         * In another word, @BindsInstance binds the instance of Account that is constructed outside of the graph
+         * into this subcomponent
          */
         UserCommandsRouter create(@BindsInstance Account account);
     }

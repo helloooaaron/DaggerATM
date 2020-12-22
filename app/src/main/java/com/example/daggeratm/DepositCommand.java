@@ -20,17 +20,23 @@ public final class DepositCommand implements Command {
     private static final String LOG_TAG = DepositCommand.class.getSimpleName();
     private final Account account;
     private final Outputter outputter;
+    private final WithdrawalLimiter withdrawalLimiter;
 
     @Inject
-    public DepositCommand(Account account, Outputter outputter) {
+    public DepositCommand(Account account,  // account is binded thru @BindsInstance in subcomponent
+                          Outputter outputter,
+                          WithdrawalLimiter withdrawalLimiter) {
         this.account = account;
         this.outputter = outputter;
+        this.withdrawalLimiter = withdrawalLimiter;
         outputter.output(LOG_TAG, "Creating a new " + this);
     }
 
     @Override
     public Result handleInput(List<String> input) {
-        account.deposit(new BigDecimal(input.get(0)));
+        BigDecimal amount = new BigDecimal(input.get(0));
+        account.deposit(amount);
+        withdrawalLimiter.recordDeposit(amount);
         outputter.output(LOG_TAG, account.username() + " now has: " + account.balance());
         return Result.handled();
     }

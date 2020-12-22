@@ -96,7 +96,7 @@ final class CommandProcessor {
         LoggingOutModule.class, /* Tell Dagger to use LoggingOutModule as instructions */
         UserCommandsRouter.InstallationModule.class, /* Tell Dagger to user UserCommandsRouter.InstallationModule as instructions */
 })
-@Singleton
+@Singleton // It's really just another @Scope annotation.
 interface CommandProcessorFactory {
     /**
      * Request a CommandProcessor instance

@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-@Singleton
+@Singleton // It's really another @Scope annotation. The lifetime of this instance is bounded with the lifetime of the component(CommandProcessorFactory) annotated with @Singleton
 public final class Database {
     private final Map<String, Account> accounts = new HashMap<>();
 
